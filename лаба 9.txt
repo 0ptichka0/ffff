@@ -1,0 +1,107 @@
+conn SYSTEM/1324 as SYSDBA
+
+--Проверим установленные режимы архивации журналов транзакций
+archive log list;
+
+
+--Перевод БД в режим ARCHIVELOG
+shutdown immediate
+
+startup mount
+
+alter database archivelog;
+alter database open;
+
+--Определим пути к папкам, где хранятся архивные журналы транзакций
+select destination from v$archive_dest where status='VALID';
+
+--Определим названия и пути к управляющим файлам 
+select valuse from v$parameter where name ='control_files';
+
+--Название табличных пространств и пути к ним
+select t.name "Tablespace", f.name "Datafile" from v$tablespace t, v$datafile f where t.ts.ts# order by t.name
+
+--Узнаем имена журналов транзакций и пути к ним
+select member from v$logfile;
+
+
+--Архивация «на горячую»
+--Операция архивации файла табличного пространства «на горячую» возможна только тогда, 
+--когда БД работает в архивном режиме. Она состоит из следующих этапов:
+--Перевод табличного пространства в режим резервного копирования;
+--Создание резервной копии файла табличного пространства;
+--Вывод табличного пространства из режима резервного копирования;
+--Принудительный сброс контрольной точки для синхронизации процесса регистрации резервной копии 
+--внутренними средствами БД
+
+alter tablespace sysaux begin backup;
+alter tablespace sysaux end backup;
+alter system checkpoint;
+
+alter tablespace system begin backup;
+alter tablespace system end backup;
+alter system checkpoint;
+
+alter tablespace undotbs1 begin backup;
+alter tablespace undotbs1 end backup;
+alter system checkpoint;
+
+alter tablespace users begin backup;
+alter tablespace users end backup;
+alter system checkpoint;
+
+
+--Архивация  управляющего файла необходимо выполнить команду, с 
+--указанием пути к резервной копии управляющего файла
+
+alter database backup controlfile to '' reuse;
+alter database backup controlfile to '' reuse;
+alter database backup controlfile to '' reuse;
+
+--Архивация файлов журналов транзакций необходимо скопировать каталог, в 
+--который БД помещает архивные копии журналов транзакций в процессе своей работы
+
+
+alter SYSTEM arcive log current;
+--Архивация конфигурационных файлов БД производится вручную.
+
+
+---------Полное восстановление БД
+
+shotdown immediate
+
+startup mount
+
+alter database backup controlfile to trace;
+
+
+---------Резервное копирование всей базы данных с помощью RMAN
+chcp 1251
+
+cd \
+C:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
