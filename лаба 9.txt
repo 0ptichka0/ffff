@@ -4,7 +4,7 @@ conn SYSTEM/1324 as SYSDBA
 archive log list;
 
 
---Перевод БД в режим ARCHIVELOG
+--Перевод БД в режим ARCHIVELOG1111
 shutdown immediate
 
 startup mount
